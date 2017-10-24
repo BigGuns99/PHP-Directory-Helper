@@ -210,7 +210,7 @@ class Crawler {
 
         return $finalResults;
     }
-    
+   
     /**
      * 
      * @param String - A full server path to parse.
@@ -247,5 +247,79 @@ class Crawler {
 
         return $finalResults;
     }
+    
+        /**
+     * 
+     * @param String - A full server path to parse.
+     * @return Array -  A filtered array of all files with their local paths. 
+     */
+    
+    public function find_all_files($dir) 
+    { 
+    $root = scandir($dir); 
+    foreach($root as $value) 
+    { 
+        if($value === '.' || $value === '..') {continue;} 
+        if(is_file("$dir/$value")) {$result[]="$dir/$value";continue;} 
+        foreach(find_all_files("$dir/$value") as $value) 
+        { 
+            $result[]=$value; 
+        } 
+    } 
+    return $result; 
+}
+
+  /**
+     * 
+     * @param String - A full server path to parse.
+     * @param bolean - TRUE/FALSE to check for specfic extnesions.	 
+     * @param array - Extension list which need to be filtered out.	 
+     * @param bolean - TRUE/FALSE to Remove spaces in file paths and file names.
+     * @return Array -  A filtered array of all files with their local paths. 
+     */
+    
+    public function find_all_files_ext($dir,$extacheck=false,$exta_list=array(),$remove_spaces=false) 
+    { 
+	$result = array();
+    $root = scandir($dir); 
+    foreach($root as $value) 
+    { 
+        if($value === '.' || $value === '..') {continue;} 
+        if(is_file("$dir/$value")) {
+			if($extacheck){
+			$exta = pathinfo($value, PATHINFO_EXTENSION);
+			if(in_array(strtolower($exta),$exta_list)) {
+				if($remove_spaces){
+				$pathy = str_replace(' ', '_', $dir);
+				rename($dir,$pathy);
+				$fily = str_replace(' ', '_', $value);
+				rename("$pathy/$value","$pathy/$fily");
+				$result[]="$pathy/$fily";
+				}else{
+					$result[]="$dir/$value";
+				}
+			}else{
+				// unlink("$dir/$value");
+			}
+			}else{
+				if($remove_spaces){
+				$pathy = str_replace(' ', '_', $dir);
+				rename($dir,$pathy);
+				$fily = str_replace(' ', '_', $value);
+				rename("$pathy/$value","$pathy/$fily");
+				$result[]="$pathy/$fily";
+				}else{
+					$result[]="$dir/$value";
+				}
+			}
+			continue;
+		} 
+        foreach(find_all_files("$dir/$value") as $value) 
+        { 
+            $result[]=$value; 
+        } 
+    } 
+    return $result; 
+}
 
 }
